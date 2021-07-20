@@ -13,7 +13,8 @@ import {
 } from "react-native";
 import { Audio } from "expo-av";
 import { connect } from "react-redux";
-import Slider from "@react-native-community/slider";
+// import Slider from "@react-native-community/slider";
+import Slider from "react-native-smooth-slider";
 import { LinearGradient } from "expo-linear-gradient";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 
@@ -69,13 +70,10 @@ const MediaPlayer = ({ media, addSong, addLength }) => {
   }
 
   React.useEffect(() => {
-    getSong(index);
-  }, [index]);
-
-  React.useEffect(() => {
     if (media.length) {
       console.log("media.length : ", media.length);
       setLength((media.length / media.song.status.durationMillis) * 100);
+
       // console.log(
       //   msToTime((length / 100) * media.song.status.durationMillis + 500)
       // );
@@ -95,6 +93,9 @@ const MediaPlayer = ({ media, addSong, addLength }) => {
       }
     }
   }, [media.length]);
+  React.useEffect(() => {
+    getSong(index);
+  }, [index]);
 
   LogBox.ignoreAllLogs(true);
 
@@ -229,15 +230,18 @@ const MediaPlayer = ({ media, addSong, addLength }) => {
                   },
                 ],
               }}
+              useNativeDriver={true}
+              animateTransitions={true}
+              animationType="timing"
               minimumValue={0}
               maximumValue={100}
               value={length}
               shouldRasterizeIOS={true}
               thumbTintColor="#684892"
               minimumTrackTintColor="#684892"
-              onSlidingComplete={(value) => {
-                media.song.sound.setPositionAsync(
-                  (value / 100) * media.song.status.durationMillis
+              onValueChange={async (value) => {
+                await media.song.sound.setPositionAsync(
+                  (value / 100) * media.song.status.durationMillis + 90
                 );
                 console.log(
                   (value / 100) * media.song.status.durationMillis + 510
@@ -273,6 +277,7 @@ const MediaPlayer = ({ media, addSong, addLength }) => {
             >
               <TouchableOpacity
                 style={{ marginRight: 40 }}
+                disabled={!playButtonLoading ? false : true}
                 onPress={() => {
                   setPlayButtonLoading(true);
                   if (index <= 0) {
@@ -337,6 +342,7 @@ const MediaPlayer = ({ media, addSong, addLength }) => {
 
               <TouchableOpacity
                 style={{ marginLeft: 40 }}
+                disabled={!playButtonLoading ? false : true}
                 onPress={() => {
                   setPlayButtonLoading(true);
                   if (index >= songs.length - 1) {
